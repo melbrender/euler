@@ -11,7 +11,7 @@
  *
  * Output:
  *
- * 2016-02-14 15:33:35 - CPU time used: 0 hrs 00 mins 01.652 secs
+ * 2016-02-14 15:33:35 - CPU time used: 0 hrs 00 mins 01.542 secs
  *                         Longest chain was 524 in length starting with 837799
  */
 
@@ -21,12 +21,12 @@ unsigned int next_coll(unsigned int n);
 
 int main(void)
    {
-   unsigned int count, i, j, max, maxval, start_tics;
+   unsigned int count, i, j, max, maxval, start_tics, limit=1000000;
    char msg[200];
 
    start_tics = clock();
    max=0;                     /* init max length found   */
-   for (i=2; i<1000000; i++)
+   for (i=2; i<limit; i++)
       {
      count = 0;
       j = i;
