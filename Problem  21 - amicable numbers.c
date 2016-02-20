@@ -6,7 +6,7 @@
  * An amicable pair of primes are p and q where the sum of the proper
  * divisors of p is q, and the sum of the proper divisors of q is p.
  *
- * Method one: build a table by directly counting numbers of divisors.
+ * Method: build a table by directly counting numbers of divisors.
  *
  * Output:
  *
