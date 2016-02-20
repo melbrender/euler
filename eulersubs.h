@@ -11,6 +11,7 @@
 #include "stdlib.h"
 #include "time.h"
 #include "math.h"
+#include "stdarg.h"
 
 #ifndef EULERSUBS_H_
 #define EULERSUBS_H_
@@ -20,6 +21,8 @@ int buildprimes(int maxvalue);                        /* build list of primes fo
 int buildprimesdivs(int maxvalue);                    /* build primes list, divisor counts list       */
 int isprime(int val);                                 /* tests primality; call one of above first     */
 unsigned int comb(unsigned int m, unsigned int n);    /* calculates combinations(m,n)                 */
+int arepermuted(int count, ...);                      /* determine if 2 or more integers have same    */
+                                                      /*  digits but possibly permuted                */
 void err_exit(char *msg, int code);                   /* display timestamp, a message, exit program   */
 int logcputime(int start_tics, char *msg);            /* display timestamp, cpu time used, and a msg  */
 int lognote(char *msg);                               /* display timestamp and a message              */
