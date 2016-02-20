@@ -423,6 +423,69 @@ unsigned int comb(unsigned int m, unsigned int n)
    return(res);
    }
 
+/* Determine if two or more integers involve the same digits permuted
+ *
+ * arepermuted() will check whether every one of the integers in its argument list
+ * involve the same digits merely permuted. If so it will return 1. Otherwise it will
+ * return 0.
+ *
+ * To be clear, we will return 1 only if each digit is used the same number of times in every
+ * argument.
+ *
+ * Parameters:
+ *
+ * count    will specify how many integers to be checked appear in the argument list
+ * val1,    integers to be
+ * val2,     checked to see if they
+ *  ...       involve the same digits permuted
+ */
+int arepermuted(int count, ...)
+   {
+   va_list ap;                               /* points to optional arguments in turn   */
+   int i, j, n, tmp, val, digit;
+   int vals[8];                              /* array of values to check               */
+   short int *digsused[8][10];               /* two-dimensional array of digit counts  */
+
+   va_start(ap, count);                      /* start the variable list going          */
+   if (count > 8)
+      err_exit("arepermuted() error: called with too many arguments", 2);
+   if (count < 2)
+      err_exit("arepermuted() error: called with too few arguments", 2);
+
+   tmp = count;
+   j = 0;
+   while(tmp > 0)
+      {
+      vals[j++] = va_arg(ap, int);           /* fetch next parameter                   */
+      tmp--;
+      }
+   va_end(ap);                               /* clean up                               */
+
+   for (i=0; i<count; i++)
+      for (n=0; n<10; n++)
+         digsused[i][n] = 0;                 /* clear digits count fields              */
+
+   for (i=0; i<count; i++)
+      {
+      val = vals[i];                         /* for each parameter                     */
+      while (val > 0)                        /* and record the digits used             */
+         {
+         digit = val%10;
+         digsused[i][digit]++;               /* count a digit used                     */
+         val /= 10;                          /* shift to the right                     */
+         }
+      }
+
+   for (i=1; i<count; i++)                   /* for all values past the first          */
+      for (n=0; n<10; n++)                   /*  and each possible digit, if there     */
+         {                                   /*   is a discrepancy from the first then */
+         if (digsused[0][n] != digsused[i][n]) /*  our answer is no                    */
+            return(0);
+         }
+   return(1);                                /* if we got here, our answer is yes      */
+   }
+
+
 /* Exit with an error note: err_exit()
  *
  * Display the caller's error note with a timestamp, and exit with
