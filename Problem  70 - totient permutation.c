@@ -13,8 +13,8 @@
  *
  * Output:
  *
- * 2016-02-19 17:28:46 - There were 2068 integers for which the phi function had the same digits permuted
- * 2016-02-19 17:28:46 - CPU time used: 0 hrs 00 mins 08.752 secs
+ * 2016-02-20 14:40:04 - There were 2068 integers for which the phi function had the same digits permuted
+ * 2016-02-20 14:40:04 - CPU time used: 0 hrs 00 mins 08.141 secs
  *                         Minimum ratio was 1.000709 with integer 8319823 and tots 8313928
  */
 
@@ -24,11 +24,10 @@ int phi_prime_power(int p, int k);
 
 int main()
    {
-   int i, j, k, e, m, n, p, sq, val, mini, limit=10000000;
-   int start_tics, count=0;
+   int i, j, k, e, p, sq, mini, limit=10000000;
+   int start_tics, count=0, *tots, *lowprimes;
    double num, den, ratio, min=1000000.0;
-   char digitsused[2][11], msg[200];
-   int *tots, *lowprimes, digit, candidates[2], match_flag;
+   char msg[200];
 
    /*
     * First, build a list of the values of the totient function. We use the same
@@ -95,36 +94,9 @@ int main()
    for (i=2; i<limit; i++)                   /* search for integers where phi(n)    */
                                              /* consists of digits of n permuted    */
       {
-      candidates[0] = i;                     /* create maps of the digits used for  */
-      candidates[1] = tots[i];               /*  both i and tots[i]:                */
-      for (m=0; m<2; m++)                    /* clear the counts of digits used     */
-         {
-         for(n=0; n<10; n++)
-            digitsused[m][n] = 0;
-         }
-      for (m=0; m<2; m++)
-         {
-         val = candidates[m];
-         while (val > 0)
-            {
-            digit = val%10;
-            digitsused[m][digit]++;            /* count a digit used                  */
-            val /= 10;                         /* shift to the right                  */
-            }
-         }
-
-      match_flag = 1;
-      for(n=0; n<10; n++)
-         {
-         if (digitsused[0][n] != digitsused[1][n])
-            {
-            match_flag = 0;
-            break;
-            }
-         }
-      if (match_flag == 1)
-         {
-         count++;
+      if (arepermuted(2, i, tots[i]) == 1)   /* if they are permutations            */
+         {                                   /*  we've got a canditate so           */
+         count++;                            /*   check the ratio of i/phi(i)       */
          num = i;
          den = tots[i];
          ratio= num/den;
