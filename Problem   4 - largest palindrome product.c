@@ -36,24 +36,33 @@ int main(void)
    exit(0);
    }
 
+/* Test a number to see if it is a palindrome.
+ *
+ * Form the reverse-reading integer by repeatedly shearing off the lowest
+ * order digit and forming a new number with these digits added on the left.
+ * If the new number equals the old number, it was a palindrome.
+ *
+ * Return values:
+ *
+ * 1 if the input is a palindrome in base 10
+ * 0 otherwise
+ */
 int ispalind(int n)
    {
-   /* returns 1 if integer is palindromic in base 10
-    * returns 0 otherwise
-    */
+   int nn, sum=0, lodig;
 
-   char s[100];
-   int i, len;
-
-   sprintf(s, "%d", n);             /* convert to string         */
-   len = strlen(s);                 /* get length                */
-
-   for (i=0; i<(len+1/2); i++)
+   nn = n;                    /* save original value        */
+   while (nn > 0)
       {
-      if (s[i] != s[len-i-1])       /* if not palindrome         */
-         return(0);                 /*  return right away        */
-      }
+      lodig = nn%10;          /* isolate low digit          */
+      sum = 10*sum+lodig;     /* build new integer with     */
+      nn /= 10;               /*  these digits in           */
+      }                       /*   reverse order            */
 
-   return(1);                       /* it is a palindrome        */
+   if (n == sum)              /* if the result is the       */
+      return(1);              /*  same, it's a palindrome   */
+   else
+      return(0);              /* else it's not              */
    }
+
 
