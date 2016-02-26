@@ -3,14 +3,12 @@
  *
  * Output:
  *
- * 2016-02-20 14:52:33 - CPU time used: 0 hrs 00 mins 00.330 secs
- *                         Maximal result: 913 x 993 = 906609
+ * 2016-02-26 18:16:55 - CPU time used: 0 hrs 00 mins 00.150 secs
+ *                         Maximal result: 993 x 913 = 906609
  */
 
 
 #include "eulersubs.h"
-
-int ispalind(int n);
 
 int main(void)
    {
@@ -19,50 +17,23 @@ int main(void)
 
    start_tics = clock();
 
-   for (i=100; i<=999; i++)
+   for (i=999; i>99; i--)           /* loop backwards on i                 */
       {
-      for (j=100; j<999; j++)
-         if (ispalind(i*j) == 1)
-            if (i*j > max)
-               {
-               max = i*j;
-               savei = i;
-               savej = j;
+      for (j=999; j>99; j--)        /*  and on j                           */
+         {
+         if (ispalind(i*j, 10) == 1)
+            if (i*j > max)          /* so that we can save time            */
+               {                    /*  by moving on to the next j         */
+               max = i*j;           /*   once we have a new max with a     */
+               savei = i;           /*    given i since we'll never do     */
+               savej = j;           /*     better with the same i and a    */
+               break;               /*      lower j (thanks Kate!)         */
                }
+         }
       }
 
    sprintf(msg, "Maximal result: %d x %d = %d\n", savei, savej, savei*savej);
    logcputime(start_tics, msg);
    exit(0);
    }
-
-/* Test a number to see if it is a palindrome.
- *
- * Form the reverse-reading integer by repeatedly shearing off the lowest
- * order digit and forming a new number with these digits added on the left.
- * If the new number equals the old number, it was a palindrome.
- *
- * Return values:
- *
- * 1 if the input is a palindrome in base 10
- * 0 otherwise
- */
-int ispalind(int n)
-   {
-   int nn, sum=0, lodig;
-
-   nn = n;                    /* save original value        */
-   while (nn > 0)
-      {
-      lodig = nn%10;          /* isolate low digit          */
-      sum = 10*sum+lodig;     /* build new integer with     */
-      nn /= 10;               /*  these digits in           */
-      }                       /*   reverse order            */
-
-   if (n == sum)              /* if the result is the       */
-      return(1);              /*  same, it's a palindrome   */
-   else
-      return(0);              /* else it's not              */
-   }
-
 
