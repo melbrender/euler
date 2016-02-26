@@ -297,6 +297,34 @@ int isprime(int val)
       return(0);
    }
 
+/* Test a number to see if it is a palindrome in a given base
+ *
+ * Form the reverse-reading integer by repeatedly shearing off the lowest
+ * order digit and forming a new number with these digits added on the right.
+ * If the new number equals the old number, it was a palindrome.
+ *
+ * Return values:
+ *
+ * 1 if the input is a palindrome in base 10
+ * 0 otherwise
+ */
+int ispalind(int n, int base)
+   {
+   int nn, sum=0, lodig;
+
+   nn = n;                    /* save original value        */
+   while (nn > 0)
+      {
+      lodig = nn%base;        /* isolate low digit          */
+      sum = base*sum+lodig;   /* build new integer with     */
+      nn /= base;             /*  these digits in           */
+      }                       /*   reverse order            */
+
+   if (n == sum)              /* if the result is the       */
+      return(1);              /*  same, it's a palindrome   */
+   else
+      return(0);              /* else it's not              */
+   }
 /* Count combinations: comb()
  *
  * Calculate the number of combinations of m things taken n at a time.
