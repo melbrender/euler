@@ -62,7 +62,7 @@ int maxval=0;                       /* highest value for which above tables are 
  */
 int buildprimes(int maxprime)
    {
-   int start_tics, i, j;
+   int start_tics, sq, i, j;
    char msg[200];
 
    start_tics = clock();               /* record CPU time now                 */
@@ -75,10 +75,10 @@ int buildprimes(int maxprime)
       primecnt=0;
       }
 
-   divcnts = calloc(maxprime+1,        /* allocate space for the sieve        */
-         sizeof(int));
-   if (divcnts == NULL)
-       err_exit("buildprimes() error: cannot allocate space for divcnts[]!", 1);
+   /* allocate space for the sieve           */
+
+   divcnts = get_mem_or_exit(maxprime+1, sizeof(int), "divcnts array");
+
    maxval = maxprime;                  /* save highest value studied          */
 
    divcnts[0] = 0;                     /* 0 and 1 are not primes              */
@@ -87,7 +87,8 @@ int buildprimes(int maxprime)
    for (i=2; i<=maxprime; i++)         /* fill the rest of the sieve          */
       divcnts[i] = 2;                  /*  with twos                          */
 
-   for (i=0; i<=sqrt(maxprime); i++)   /* for each run of the loop, the first */
+   sq = sqrt(maxprime);
+   for (i=0; i<=sq; i++)               /* for each run of the loop, the first */
       {                                /*  value of i with divcnts[i] != 0    */
       if (divcnts[i] != 0)             /*   is the next prime number          */
          for (j=i*i; j<=maxprime; j+=i)/*     so strike out all multiples     */
@@ -95,14 +96,12 @@ int buildprimes(int maxprime)
       }                                /*       its square (lower multiples   */
                                        /*        were taken care of earlier)  */
    for (i=0; i<=maxprime; i++)         /*  count the primes we found          */
-      if (divcnts[i] != 0)
-         primecnt++;
+      if (divcnts[i] != 0)             /* at this point all primes have two   */
+         primecnt++;                   /*  and all composites have zero       */
 
    /*   Allocate space for the list of primes   */
 
-   primes = calloc(primecnt, sizeof(int));
-   if (primes == NULL)
-      err_exit("buildprimes() error: cannot allocate space for primes[]!", 1);
+   primes = get_mem_or_exit(primecnt, sizeof(int), "primes array");
 
    j = 0;                              /* initialize index into primes        */
    for (i=0; i<=maxprime; i++)         /* build array of primes               */
@@ -176,21 +175,15 @@ int buildprimesdivs(int maxprime)
     * phase it will contain:
     *
     *       zero for each prime
-    *       the largest prime divisor for each composite
+    *       a prime divisor for each composite
     *
     * The two lists are built together, each helping to build the other.
     */
 
    sq = sqrt(maxprime);
-   lowprimes = calloc(sq+1,            /* allocate space for the small list   */
-         sizeof(int));
-   if (lowprimes == NULL)
-      err_exit("buildprimesdivs() error: cannot allocate space for lowprimes[]!", 2);
+   lowprimes = get_mem_or_exit(sq+1, sizeof(int), "lowprimes array");
+   divcnts = get_mem_or_exit(maxprime+1, sizeof(int), "divcnts array");
 
-   divcnts = calloc(maxprime+1,        /* allocate space for divcnts[]        */
-         sizeof(int));
-   if (divcnts == NULL)
-      err_exit("buildprimesdivs() error: cannot allocate space for divcnts[]!", 2);
    maxval = maxprime;                  /* save highest value studied          */
 
    /* Build lowprimes[] and divcnts[] simultaneously                          */
@@ -204,8 +197,8 @@ int buildprimesdivs(int maxprime)
          {                             /*   will be the next prime.           */
          for(j=i*i; j<=sq; j+=i)       /* zero out non-primes by striking     */
             lowprimes[j]=0;            /*  out all higher multiples           */
-         for(j=i*2; j<=maxprime; j+=i) /* leave highest prime dividing        */
-            divcnts[j]=i;              /*  each integer in divcnts            */
+         for(j=i*i; j<=maxprime; j+=i) /* leave a prime dividing each         */
+            divcnts[j]=i;              /*  composite integer in divcnts       */
          }
       }
 
@@ -226,8 +219,8 @@ int buildprimesdivs(int maxprime)
          }
       else
          {                             /* for the composites, take the        */
-         p=divcnts[i];                 /*  largest prime divisor, and count   */
-         k=i;                          /*    the times it is a factor         */
+         p=divcnts[i];                 /*  prime divisor we have, and count   */
+         k=i;                          /*   the times it is a factor          */
          e=0;
          while(k%p==0)
             {
@@ -245,11 +238,7 @@ int buildprimesdivs(int maxprime)
     */
 
    free(lowprimes);                    /* discard the junior list             */
-
-   primes = calloc(primecnt,           /* allocate space for the full list    */
-         sizeof(int));
-   if (primes == NULL)
-      err_exit("buildprimesdivs() error: cannot allocate space for primes[]!", 2);
+   primes = get_mem_or_exit(primecnt, sizeof(int), "primes array");
 
    j = 0;                              /* fill the primes[] table with        */
    for (i=0; i<=maxprime; i++)         /*  the primes we have found           */
@@ -295,35 +284,6 @@ int isprime(int val)
       return(1);
    else
       return(0);
-   }
-
-/* Test a number to see if it is a palindrome in a given base
- *
- * Form the reverse-reading integer by repeatedly shearing off the lowest
- * order digit and forming a new number with these digits added on the right.
- * If the new number equals the old number, it was a palindrome.
- *
- * Return values:
- *
- * 1 if the input is a palindrome in base 10
- * 0 otherwise
- */
-int ispalind(int n, int base)
-   {
-   int nn, sum=0, lodig;
-
-   nn = n;                    /* save original value        */
-   while (nn > 0)
-      {
-      lodig = nn%base;        /* isolate low digit          */
-      sum = base*sum+lodig;   /* build new integer with     */
-      nn /= base;             /*  these digits in           */
-      }                       /*   reverse order            */
-
-   if (n == sum)              /* if the result is the       */
-      return(1);              /*  same, it's a palindrome   */
-   else
-      return(0);              /* else it's not              */
    }
 /* Count combinations: comb()
  *
@@ -451,6 +411,36 @@ unsigned int comb(unsigned int m, unsigned int n)
    return(res);
    }
 
+
+/* Test a number to see if it is a palindrome in a given base
+ *
+ * Form the reverse-reading integer by repeatedly shearing off the lowest
+ * order digit and forming a new number with these digits added on the right.
+ * If the new number equals the old number, it was a palindrome.
+ *
+ * Return values:
+ *
+ * 1 if the input is a palindrome in base 10
+ * 0 otherwise
+ */
+int ispalind(int n, int base)
+   {
+   int nn, sum=0, lodig;
+
+   nn = n;                    /* save original value        */
+   while (nn > 0)
+      {
+      lodig = nn%base;        /* isolate low digit          */
+      sum = base*sum+lodig;   /* build new integer with     */
+      nn /= base;             /*  these digits in           */
+      }                       /*   reverse order            */
+
+   if (n == sum)              /* if the result is the       */
+      return(1);              /*  same, it's a palindrome   */
+   else
+      return(0);              /* else it's not              */
+   }
+
 /* Determine if two or more integers involve the same digits permuted
  *
  * arepermuted() will check whether every one of the integers in its argument list
@@ -513,7 +503,32 @@ int arepermuted(int count, ...)
    return(1);                                /* if we got here, our answer is yes      */
    }
 
+/*
+ * Obtain zero-filled memory
+ *
+ * This wrapper makes a call to calloc() to obtain the desired number of objects of
+ * a specified size. If it succeeds it will return a pointer to the memory obtained.
+ *
+ * We use the caller's tag in the error note.
+ *
+ * If it fails it will print an error note and exit.
+ *
+ */
+void *get_mem_or_exit(size_t n, size_t s, char *tag)
+   {
+   void *p;
+   char msg[200];
 
+   p = calloc(n, s);                   /* make the call           */
+   if (p == NULL)                      /* if trouble, formualate  */
+      {                                /*  a goodbye note         */
+      sprintf(msg, "calloc failure requesting %d objects of size %d for %s",
+            n, s, tag);
+      err_exit(msg, 1);
+      }
+
+   return(p);                          /* return memory to caller */
+   }
 /* Exit with an error note: err_exit()
  *
  * Display the caller's error note with a timestamp, and exit with
